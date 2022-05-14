@@ -36,6 +36,7 @@ def data_preprocessing(
             preprocessed_output, train_file, valid_file, test_file
         )
     _create_test_data(train_file, valid_file, test_file)
+    _make_test(test_file)
     _create_vocab(train_file, user_vocab, item_vocab, cate_vocab)
     _negative_sampling_offline(
         sampled_instance_file, valid_file, test_file, valid_num_ngs, test_num_ngs
@@ -443,6 +444,34 @@ def _negative_sampling_offline(
             words[2] = neg_item
             words[3] = item2cate[neg_item]
             write_test.write("\t".join(words) + "\n")
+
+def _make_test(test_file):
+    f = open(test_file, 'r', encoding='utf-8')
+    lines = f.readlines()
+    f.close()
+    
+    output = []
+    for line in lines:
+
+        last = line
+        line = line.rstrip().split('\t')
+        
+        if line[0] == '0' : continue
+        user_id = line[1]
+        hseq = line[5].rstrip().split(',')
+        hlt = line[6].rstrip().split(',')
+        htime = line[7].rstrip().split(',')
+        mlen = (len(hseq) // 3) * 2
+        for i in range(mlen, len(hseq)):
+            next_problem = hseq[i]
+            next_lt = hlt[i]
+            next_time = htime[i]
+            output.append('\t'.join(['1', user_id, next_problem, next_lt, next_time, ','.join(hseq[0:i]), ','.join(hlt[0:i]), ','.join(htime[0:i])]))
+    
+    output.append(last)
+    f = open(test_file+"_test", 'w', encoding='utf-8')
+    f.write('\n'.join(output))
+    f.close()
 
 # dir = "D:\AlgorithmProblemRecommender\Recommenders\\"
 # data_preprocessing(dir, dir + "train_data", dir + "valid_data", dir + "test_data", dir + "user_vocab.pkl" , dir + "item_vocab.pkl", dir + "cate_vocab.pkl")
