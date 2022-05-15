@@ -461,7 +461,7 @@ def _make_test(test_file):
         hseq = line[5].rstrip().split(',')
         hlt = line[6].rstrip().split(',')
         htime = line[7].rstrip().split(',')
-        mlen = (len(hseq) // 3) * 2
+        mlen = min((len(hseq) * 2) // 3, 1)
         for i in range(mlen, len(hseq)):
             next_problem = hseq[i]
             next_lt = hlt[i]
@@ -469,7 +469,7 @@ def _make_test(test_file):
             output.append('\t'.join(['1', user_id, next_problem, next_lt, next_time, ','.join(hseq[0:i]), ','.join(hlt[0:i]), ','.join(htime[0:i])]))
     
     output.append(last)
-    f = open(test_file+"_test", 'w', encoding='utf-8')
+    f = open(test_file, 'w', encoding='utf-8')
     f.write('\n'.join(output))
     f.close()
 
