@@ -3,6 +3,8 @@ preprocessedUsers/
 model/
 summary/
 resources/submits/
+recommend/data/
+chromedriver.exe
 category.txt
 puser_list.txt
 train_data
