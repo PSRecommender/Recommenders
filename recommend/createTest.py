@@ -1,7 +1,5 @@
-from pickle import FALSE
-from flask import Flask
+from flask import Flask, request, jsonify
 from selenium import webdriver
-import time
 from datetime import datetime
 import json
 import pandas as pd
@@ -18,11 +16,23 @@ def loadJson(dir):
         return json.load(file)
 
 def getUserData(userId):
+    dir = 'D:/AlgorithmProblemRecommender/Recommenders/recommend/data/' + userId
+    isMember = False
+    try:
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+        else: isMember = True
+    except OSError:
+        print('Error : mkdir')
+    if isMember:
+        userDict = loadJson(dir + '/{userId}.json'.format(userId=userId))
+        lastSub = userDict[0]['sbNum']
+        find = False
     options = webdriver.ChromeOptions()
-    options.add_argument('--headleass')
+    options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    driver = webdriver.Chrome('chromedriver', options=options)
+    driver = webdriver.Chrome('D:/AlgorithmProblemRecommender/Recommenders/recommend/chromedriver.exe', options=options)
     driver.implicitly_wait(1)
     url = "https://www.acmicpc.net/status?user_id={userId}&result_id=4".format(userId=userId)
     sbDict = []
@@ -34,6 +44,10 @@ def getUserData(userId):
         for i in tr:
             td = i.find_elements_by_tag_name('td')
             sbNum = td[0].text
+            if isMember:
+                if sbNum == lastSub: 
+                    find = True
+                    break
             uId = td[1].text
             pId = td[2].text
             result = td[3].text
@@ -41,8 +55,9 @@ def getUserData(userId):
             time = td[5].text
             lang = td[6].text
             codeLen = td[7].text
-            sbTime = td[8].find_element_by_tag_name('a').get_attribute('data-original_title')
+            sbTime = td[8].find_element_by_tag_name('a').get_attribute('data-timestamp')
             sbDict.append({'sbNum':sbNum, 'uId':uId, 'pId':pId, 'result':result, 'memory':memory, 'time':time, 'lang':lang, 'codeLen':codeLen, 'sbTime':sbTime})
+        if isMember and find: break
         try:
             nextPage = driver.find_element_by_id('next_page').get_attribute('href')
         except Exception:
@@ -50,19 +65,17 @@ def getUserData(userId):
         driver.get(nextPage)
         print(cnt)
         cnt = cnt + 1
-    try:
-        if not os.path.exists('data/'+userId):
-            os.makedirs('data/'+userId)
-    except OSError:
-        print('Error : mkdir')
-    toJson('data/' + userId + '/' + userId + ".json", sbDict)
+    if isMember:
+        sbDict = sbDict + userDict
+    toJson(dir + '/' + userId + ".json", sbDict)
     driver.quit()
 
 def data_preprocessing(userId):
     # 문제 태그 데이터 가져오기
-    categoryDF = pd.read_csv('category.csv', index_col=0, dtype=str, encoding='utf-8')
+    dir = 'D:/AlgorithmProblemRecommender/Recommenders/recommend/'
+    categoryDF = pd.read_csv(dir + 'category.csv', index_col=0, dtype=str, encoding='utf-8')
 
-    file = 'data/{userId}/{userId}.json'.format(userId=userId)
+    file = dir + 'data/{userId}/{userId}.json'.format(userId=userId)
     userDF = pd.read_json(file, dtype = str, encoding='utf-8')
     # 맞은 문제만 추출
     userDF = userDF[userDF['result']=='맞았습니다!!']
@@ -107,17 +120,31 @@ def data_preprocessing(userId):
     index = test_problem.index
     label = "0"
     now = str(int(datetime.now().timestamp()))
-    f = open('test_'+ userId,'w')
+    f = open(dir+'data/{userId}/test_{userId}'.format(userId=userId),'w')
     for i in index:
         data = test_problem.loc[i]
         pId = data['pId']
         cate = data['category']
         f.write(label + '\t' + userId + '\t' + pId + '\t' + cate + '\t' + now + '\t' + pStr + '\t' + cStr + '\t' + tStr + '\n')
 
+def getRecommend(userId):
+    dir = 'D:/AlgorithmProblemRecommender/Recommenders/recommend/data/' + userId
+    output = pd.read_csv(dir + '/output_sli_rec.txt',sep='\t',header=None,dtype=float,names=['score'])
+    test = pd.read_csv(dir + '/test', sep='\t',header=None,dtype=str,names=['label', 'uId', 'pId', 'cate', 'time', 'pHis', 'cHis', 'tHis'])
+    df = pd.concat([output, test], axis=1)
+    df = df.loc[df['score'].sort_values(ascending=False).index]
+    df = df.reset_index().drop(['index'], axis=1)
+    rec = list(df[df['score']>0.5]['pId'])
+    return rec
 
-@app.route("/")
-def hello():
-    return "Hello world"
+
+@app.route("/", methods=['POST'])
+def recommend():
+    userId = request.json['uId']
+    getUserData(userId)
+    data_preprocessing(userId)
+    rec = getRecommend(userId)
+    return jsonify(rec)
 
 if __name__ == '__main__':
     app.run()

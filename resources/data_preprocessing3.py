@@ -30,6 +30,7 @@ def data_preprocessing(
     instance_output_test = dir + 'instance_output_test'
     # instance_output_train = _create_instance(dir, 'train')
     # instance_output_test = _create_instance(dir, 'test')
+    print('create instance done')
     _create_item2cate(dir)
     preprocessed_output = _data_processing(instance_output_train)
     # preprocessed_output = dir + 'preprocessed_output'
@@ -44,7 +45,7 @@ def data_preprocessing(
     _create_vocab(train_file, user_vocab, item_vocab, cate_vocab)
     print('create vocab done')
     _negative_sampling_offline(
-        instance_output, valid_file, test_file+'_0.1', valid_num_ngs, test_num_ngs
+        instance_output, valid_file, test_file+'_0.01', valid_num_ngs, test_num_ngs
     )
     print('negative sampling offline done')
 
@@ -63,7 +64,7 @@ def _create_instance(dir, type):
     df = pd.DataFrame()
     for u in userList:
         file = dir + 'submits/' + u + '.json'
-        userDF = pd.read_json(file, dtype = str)
+        userDF = pd.read_json(file, dtype = str, encoding='utf-8')
         if len(userDF) == 0: continue
         sbTimes = []
         for s in userDF['sbTime']:
@@ -83,7 +84,7 @@ def _create_instance(dir, type):
     df = df[['label', 'uId', 'pId', 'sbTime', 'category']]
     
     # instance_output 저장 
-    df.to_csv(output_file, sep = '\t', index = False, header = None, encoding='utf-8')
+    df.to_csv(output_file, sep = '\t', index = False, header = None)
     
     return output_file
 
@@ -102,8 +103,8 @@ def _data_processing(input_file):
     dirs, _ = os.path.split(input_file)
     output_file = os.path.join(dirs, "preprocessed_output")
 
-    f_input = open(input_file, "r", encoding='utf-8')
-    f_output = open(output_file, "w", encoding='utf-8')
+    f_input = open(input_file, "r")
+    f_output = open(output_file, "w")
     user_count = {}
     for line in f_input:
         line = line.strip()
@@ -135,9 +136,9 @@ def _data_processing(input_file):
 # train, valid 파일 분리하여 추천 모델 입력 형식에 맞는 데이터 생성
 # 입력 형식 : label user_id item_id cate_id timestamp item_ids_history cate_ids_history timestamp_history
 def _data_generating(input_file, train_file, valid_file, min_sequence=1):
-    f_input = open(input_file, "r", encoding='utf-8')
-    f_train = open(train_file, "w", encoding='utf-8')
-    f_valid = open(valid_file, "w", encoding='utf-8')
+    f_input = open(input_file, "r")
+    f_train = open(train_file, "w")
+    f_valid = open(valid_file, "w")
     logger.info("data generating...")
     last_user_id = None
     for line in f_input:
@@ -203,8 +204,8 @@ def _data_generating(input_file, train_file, valid_file, min_sequence=1):
 # 테스트 사용자에 해당하는 데이터들을 테스트 데이터로 저장
 # train,valid 데이터에서 테스트 사용자에 해당하는 데이터 삭제
 def _create_test_data(input_file, test_file, min_sequence=1):
-    f_input = open(input_file, "r", encoding='utf-8')
-    fo = open(test_file, "w", encoding='utf-8')
+    f_input = open(input_file, "r")
+    fo = open(test_file, "w")
     logger.info("data generating...")
     last_user_id = None
     for line in f_input:
@@ -238,7 +239,7 @@ def _create_test_data(input_file, test_file, min_sequence=1):
                 dt_str = dt_str[:-1]
             if history_clk_num >= min_sequence:
                 fo.write(
-                    line_split[1]
+                    line_split[0]
                     + "\t"
                     + user_id
                     + "\t"
@@ -255,6 +256,7 @@ def _create_test_data(input_file, test_file, min_sequence=1):
                     + dt_str
                     + "\n"
                 )
+
         last_user_id = user_id
         if label:
             item_id_list.append(item_id)
@@ -262,8 +264,8 @@ def _create_test_data(input_file, test_file, min_sequence=1):
             dt_list.append(date_time)
     fo.close()
 
-def _sampling_test(test_file, sample_rate=0.1):
-    f_test = pd.read_csv(test_file, sep='\t', dtype=str, header=None, names=['label', 'uId', 'pId', 'cate', 'time', 'phis', 'chis', 'this'], encoding='utf-8')
+def _sampling_test(test_file, sample_rate=0.01):
+    f_test = pd.read_csv(test_file, sep='\t', dtype=str, header=None, names=['label', 'uId', 'pId', 'cate', 'time', 'phis', 'chis', 'this'], encoding='ansi')
     users = f_test['uId'].unique()
     sample_user = set()
     count = 0
@@ -275,14 +277,14 @@ def _sampling_test(test_file, sample_rate=0.1):
             count += 1
     test_df = f_test[f_test['uId'].isin(sample_user)]
     output = test_file + "_" + str(sample_rate)
-    test_df.to_csv(output, index=None, header=None, sep = '\t', encoding='utf-8')
+    test_df.to_csv(output, index=None, header=None, sep = '\t', encoding='ansi')
 
 # train 데이터에 존재하는 모든 사용자, 문제, 카테고리에 대한 vocab생성
 # user_vocab = {사용자아이디:개수}
 # item_vocab = {문제:개수}
 # cate_vocab = {카테고리:개수}
 def _create_vocab(train_file, user_vocab, item_vocab, cate_vocab):
-    f_train = open(train_file, "r", encoding='utf-8')
+    f_train = open(train_file, "r")
 
     user_dict = {}
     item_dict = {}
@@ -350,16 +352,16 @@ def _negative_sampling_offline(
     instance_input_file, valid_file, test_file, valid_neg_nums=4, test_neg_nums=49
 ):
     columns = ["label", "user_id", "item_id", "timestamp", "cate_id"]
-    ns_df = pd.read_csv(instance_input_file, sep="\t", names=columns, dtype=str, encoding='utf-8')
+    ns_df = pd.read_csv(instance_input_file, sep="\t", names=columns, dtype=str, encoding='ansi')
     items_with_popular = list(ns_df["item_id"])
 
     global item2cate
 
     # valid negative sampling
     logger.info("start valid negative sampling")
-    with open(valid_file, "r", encoding='utf-8') as f:
+    with open(valid_file, "r") as f:
         valid_lines = f.readlines()
-    write_valid = open(valid_file, "w", encoding='utf-8')
+    write_valid = open(valid_file, "w")
     for line in valid_lines:
         write_valid.write(line)
         words = line.strip().split("\t")
@@ -379,9 +381,9 @@ def _negative_sampling_offline(
 
     # test negative sampling
     logger.info("start test negative sampling")
-    with open(test_file, "r", encoding='utf-8') as f:
+    with open(test_file, "r") as f:
         test_lines = f.readlines()
-    write_test = open(test_file, "w", encoding='utf-8')
+    write_test = open(test_file, "w")
     for line in test_lines:
         write_test.write(line)
         words = line.strip().split("\t")
@@ -399,7 +401,7 @@ def _negative_sampling_offline(
             words[3] = item2cate[neg_item]
             write_test.write("\t".join(words) + "\n")
 
-# dir = "D:/AlgorithmProblemRecommender/Recommenders/resources/"
-# data_preprocessing(dir, dir + "train_data", dir + "valid_data", dir + "test_data", dir + "user_vocab.pkl" , dir + "item_vocab.pkl", dir + "cate_vocab.pkl")
+dir = "D:/AlgorithmProblemRecommender/Recommenders/resources/"
+data_preprocessing(dir, dir + "train_data", dir + "valid_data", dir + "test_data", dir + "user_vocab.pkl" , dir + "item_vocab.pkl", dir + "cate_vocab.pkl")
 
 
