@@ -1,0 +1,326 @@
+[
+	{
+		"name": "수학",
+		"engName": "Mathematics",
+		"url": "https://www.acmicpc.net/problem/tag/124",
+		"cnt": "3807"
+	},
+	{
+		"name": "구현",
+		"engName": "Implementation",
+		"url": "https://www.acmicpc.net/problem/tag/102",
+		"cnt": "3403"
+	},
+	{
+		"name": "다이나믹 프로그래밍",
+		"engName": "Dynamic Programming",
+		"url": "https://www.acmicpc.net/problem/tag/25",
+		"cnt": "2375"
+	},
+	{
+		"name": "그래프 이론",
+		"engName": "Graph Theory",
+		"url": "https://www.acmicpc.net/problem/tag/7",
+		"cnt": "2222"
+	},
+	{
+		"name": "자료 구조",
+		"engName": "Data Structures",
+		"url": "https://www.acmicpc.net/problem/tag/175",
+		"cnt": "2185"
+	},
+	{
+		"name": "문자열",
+		"engName": "String",
+		"url": "https://www.acmicpc.net/problem/tag/158",
+		"cnt": "1520"
+	},
+	{
+		"name": "그리디 알고리즘",
+		"engName": "Greedy",
+		"url": "https://www.acmicpc.net/problem/tag/33",
+		"cnt": "1320"
+	},
+	{
+		"name": "브루트포스 알고리즘",
+		"engName": "Bruteforcing",
+		"url": "https://www.acmicpc.net/problem/tag/125",
+		"cnt": "1280"
+	},
+	{
+		"name": "그래프 탐색",
+		"engName": "Graph Traversal",
+		"url": "https://www.acmicpc.net/problem/tag/11",
+		"cnt": "1211"
+	},
+	{
+		"name": "정렬",
+		"engName": "Sorting",
+		"url": "https://www.acmicpc.net/problem/tag/97",
+		"cnt": "1030"
+	},
+	{
+		"name": "기하학",
+		"engName": "Geometry",
+		"url": "https://www.acmicpc.net/problem/tag/100",
+		"cnt": "836"
+	},
+	{
+		"name": "정수론",
+		"engName": "Number Theory",
+		"url": "https://www.acmicpc.net/problem/tag/95",
+		"cnt": "833"
+	},
+	{
+		"name": "트리",
+		"engName": "Tree",
+		"url": "https://www.acmicpc.net/problem/tag/120",
+		"cnt": "824"
+	},
+	{
+		"name": "세그먼트 트리",
+		"engName": "Segment Tree",
+		"url": "https://www.acmicpc.net/problem/tag/65",
+		"cnt": "809"
+	},
+	{
+		"name": "이분 탐색",
+		"engName": "Binary Search",
+		"url": "https://www.acmicpc.net/problem/tag/12",
+		"cnt": "734"
+	},
+	{
+		"name": "너비 우선 탐색",
+		"engName": "Breadth-first Search",
+		"url": "https://www.acmicpc.net/problem/tag/126",
+		"cnt": "643"
+	},
+	{
+		"name": "사칙연산",
+		"engName": "Arithmetic",
+		"url": "https://www.acmicpc.net/problem/tag/121",
+		"cnt": "576"
+	},
+	{
+		"name": "시뮬레이션",
+		"engName": "Simulation",
+		"url": "https://www.acmicpc.net/problem/tag/141",
+		"cnt": "564"
+	},
+	{
+		"name": "깊이 우선 탐색",
+		"engName": "Depth-first Search",
+		"url": "https://www.acmicpc.net/problem/tag/127",
+		"cnt": "519"
+	},
+	{
+		"name": "조합론",
+		"engName": "Combinatorics",
+		"url": "https://www.acmicpc.net/problem/tag/6",
+		"cnt": "486"
+	},
+	{
+		"name": "애드 혹",
+		"engName": "Ad-hoc",
+		"url": "https://www.acmicpc.net/problem/tag/109",
+		"cnt": "485"
+	},
+	{
+		"name": "누적 합",
+		"engName": "Prefix Sum",
+		"url": "https://www.acmicpc.net/problem/tag/139",
+		"cnt": "469"
+	},
+	{
+		"name": "구성적",
+		"engName": "Constructive",
+		"url": "https://www.acmicpc.net/problem/tag/128",
+		"cnt": "458"
+	},
+	{
+		"name": "비트마스킹",
+		"engName": "Bitmask",
+		"url": "https://www.acmicpc.net/problem/tag/14",
+		"cnt": "389"
+	},
+	{
+		"name": "다익스트라",
+		"engName": "Dijkstra's",
+		"url": "https://www.acmicpc.net/problem/tag/22",
+		"cnt": "361"
+	},
+	{
+		"name": "백트래킹",
+		"engName": "Backtracking",
+		"url": "https://www.acmicpc.net/problem/tag/5",
+		"cnt": "298"
+	},
+	{
+		"name": "분리 집합",
+		"engName": "Disjoint Set",
+		"url": "https://www.acmicpc.net/problem/tag/81",
+		"cnt": "288"
+	},
+	{
+		"name": "분할 정복",
+		"engName": "Divide And Conquer",
+		"url": "https://www.acmicpc.net/problem/tag/24",
+		"cnt": "278"
+	},
+	{
+		"name": "해시를 사용한 집합과 맵",
+		"engName": "Set / Map By Hashing",
+		"url": "https://www.acmicpc.net/problem/tag/136",
+		"cnt": "268"
+	},
+	{
+		"name": "트리를 사용한 집합과 맵",
+		"engName": "Set / Map By Trees",
+		"url": "https://www.acmicpc.net/problem/tag/74",
+		"cnt": "256"
+	},
+	{
+		"name": "우선순위 큐",
+		"engName": "Priority Queue",
+		"url": "https://www.acmicpc.net/problem/tag/59",
+		"cnt": "253"
+	},
+	{
+		"name": "스택",
+		"engName": "Stack",
+		"url": "https://www.acmicpc.net/problem/tag/71",
+		"cnt": "227"
+	},
+	{
+		"name": "트리에서의 다이나믹 프로그래밍",
+		"engName": "Dynamic Programming On Trees",
+		"url": "https://www.acmicpc.net/problem/tag/92",
+		"cnt": "223"
+	},
+	{
+		"name": "두 포인터",
+		"engName": "Two-pointer",
+		"url": "https://www.acmicpc.net/problem/tag/80",
+		"cnt": "218"
+	},
+	{
+		"name": "소수 판정",
+		"engName": "Primality Test",
+		"url": "https://www.acmicpc.net/problem/tag/9",
+		"cnt": "196"
+	},
+	{
+		"name": "게임 이론",
+		"engName": "Game Theory",
+		"url": "https://www.acmicpc.net/problem/tag/140",
+		"cnt": "177"
+	},
+	{
+		"name": "분할 정복을 이용한 거듭제곱",
+		"engName": "Exponentiation By Squaring",
+		"url": "https://www.acmicpc.net/problem/tag/39",
+		"cnt": "162"
+	},
+	{
+		"name": "재귀",
+		"engName": "Recursion",
+		"url": "https://www.acmicpc.net/problem/tag/62",
+		"cnt": "148"
+	},
+	{
+		"name": "매개 변수 탐색",
+		"engName": "Parametric Search",
+		"url": "https://www.acmicpc.net/problem/tag/170",
+		"cnt": "131"
+	},
+	{
+		"name": "에라토스테네스의 체",
+		"engName": "Sieve Of Eratosthenes",
+		"url": "https://www.acmicpc.net/problem/tag/67",
+		"cnt": "128"
+	},
+	{
+		"name": "확률론",
+		"engName": "Probability Theory",
+		"url": "https://www.acmicpc.net/problem/tag/177",
+		"cnt": "128"
+	},
+	{
+		"name": "배낭 문제",
+		"engName": "Knapsack",
+		"url": "https://www.acmicpc.net/problem/tag/148",
+		"cnt": "121"
+	},
+	{
+		"name": "최소 스패닝 트리",
+		"engName": "Minimum Spanning Tree",
+		"url": "https://www.acmicpc.net/problem/tag/49",
+		"cnt": "119"
+	},
+	{
+		"name": "유클리드 호제법",
+		"engName": "Euclidean Algorithm",
+		"url": "https://www.acmicpc.net/problem/tag/26",
+		"cnt": "108"
+	},
+	{
+		"name": "값 / 좌표 압축",
+		"engName": "Value / Coordinate Compression",
+		"url": "https://www.acmicpc.net/problem/tag/161",
+		"cnt": "108"
+	},
+	{
+		"name": "해싱",
+		"engName": "Hashing",
+		"url": "https://www.acmicpc.net/problem/tag/8",
+		"cnt": "107"
+	},
+	{
+		"name": "위상 정렬",
+		"engName": "Topological Sorting",
+		"url": "https://www.acmicpc.net/problem/tag/78",
+		"cnt": "106"
+	},
+	{
+		"name": "플로이드–와샬",
+		"engName": "Floyd–warshall",
+		"url": "https://www.acmicpc.net/problem/tag/31",
+		"cnt": "102"
+	},
+	{
+		"name": "슬라이딩 윈도우",
+		"engName": "Sliding Window",
+		"url": "https://www.acmicpc.net/problem/tag/68",
+		"cnt": "62"
+	},
+	{
+		"name": "덱",
+		"engName": "Deque",
+		"url": "https://www.acmicpc.net/problem/tag/73",
+		"cnt": "62"
+	},
+	{
+		"name": "가장 긴 증가하는 부분 수열: o(n log n)",
+		"engName": "Longest Increasing Sequence In O(n Log N)",
+		"url": "https://www.acmicpc.net/problem/tag/43",
+		"cnt": "53"
+	},
+	{
+		"name": "큐",
+		"engName": "Queue",
+		"url": "https://www.acmicpc.net/problem/tag/72",
+		"cnt": "38"
+	},
+	{
+		"name": "0-1 너비 우선 탐색",
+		"engName": "0-1 Bfs",
+		"url": "https://www.acmicpc.net/problem/tag/176",
+		"cnt": "23"
+	},
+	{
+		"name": "외판원 순회 문제",
+		"engName": "Travelling Salesman Problem",
+		"url": "https://www.acmicpc.net/problem/tag/138",
+		"cnt": "17"
+	}
+]

@@ -1,0 +1,55 @@
+,name,engName,tagName,url
+0,수학,Mathematics,Mathematics,https://www.acmicpc.net/problem/tag/124
+1,구현,Implementation,Implementation,https://www.acmicpc.net/problem/tag/102
+2,다이나믹 프로그래밍,Dynamic Programming,DynamicProgramming,https://www.acmicpc.net/problem/tag/25
+3,그래프 이론,Graph Theory,GraphTheory,https://www.acmicpc.net/problem/tag/7
+4,자료 구조,Data Structures,DataStructures,https://www.acmicpc.net/problem/tag/175
+5,문자열,String,String,https://www.acmicpc.net/problem/tag/158
+6,그리디 알고리즘,Greedy,Greedy,https://www.acmicpc.net/problem/tag/33
+7,브루트포스 알고리즘,Bruteforcing,Bruteforcing,https://www.acmicpc.net/problem/tag/125
+8,그래프 탐색,Graph Traversal,GraphTraversal,https://www.acmicpc.net/problem/tag/11
+9,정렬,Sorting,Sorting,https://www.acmicpc.net/problem/tag/97
+10,기하학,Geometry,Geometry,https://www.acmicpc.net/problem/tag/100
+11,정수론,Number Theory,NumberTheory,https://www.acmicpc.net/problem/tag/95
+12,트리,Tree,Tree,https://www.acmicpc.net/problem/tag/120
+13,세그먼트 트리,Segment Tree,SegmentTree,https://www.acmicpc.net/problem/tag/65
+14,이분 탐색,Binary Search,BinarySearch,https://www.acmicpc.net/problem/tag/12
+15,너비 우선 탐색,Breadth-first Search,Breadth_firstSearch,https://www.acmicpc.net/problem/tag/126
+16,사칙연산,Arithmetic,Arithmetic,https://www.acmicpc.net/problem/tag/121
+17,시뮬레이션,Simulation,Simulation,https://www.acmicpc.net/problem/tag/141
+18,깊이 우선 탐색,Depth-first Search,Depth_firstSearch,https://www.acmicpc.net/problem/tag/127
+19,조합론,Combinatorics,Combinatorics,https://www.acmicpc.net/problem/tag/6
+20,애드 혹,Ad-hoc,Ad_hoc,https://www.acmicpc.net/problem/tag/109
+21,누적 합,Prefix Sum,PrefixSum,https://www.acmicpc.net/problem/tag/139
+22,구성적,Constructive,Constructive,https://www.acmicpc.net/problem/tag/128
+23,비트마스킹,Bitmask,Bitmask,https://www.acmicpc.net/problem/tag/14
+24,다익스트라,Dijkstra's,Dijkstra's,https://www.acmicpc.net/problem/tag/22
+25,백트래킹,Backtracking,Backtracking,https://www.acmicpc.net/problem/tag/5
+26,분리 집합,Disjoint Set,DisjointSet,https://www.acmicpc.net/problem/tag/81
+27,분할 정복,Divide And Conquer,DivideAndConquer,https://www.acmicpc.net/problem/tag/24
+28,해시를 사용한 집합과 맵,Set / Map By Hashing,SetMapByHashing,https://www.acmicpc.net/problem/tag/136
+29,트리를 사용한 집합과 맵,Set / Map By Trees,SetMapByTrees,https://www.acmicpc.net/problem/tag/74
+30,우선순위 큐,Priority Queue,PriorityQueue,https://www.acmicpc.net/problem/tag/59
+31,스택,Stack,Stack,https://www.acmicpc.net/problem/tag/71
+32,트리에서의 다이나믹 프로그래밍,Dynamic Programming On Trees,DynamicProgrammingOnTrees,https://www.acmicpc.net/problem/tag/92
+33,두 포인터,Two-pointer,Two_pointer,https://www.acmicpc.net/problem/tag/80
+34,소수 판정,Primality Test,PrimalityTest,https://www.acmicpc.net/problem/tag/9
+35,게임 이론,Game Theory,GameTheory,https://www.acmicpc.net/problem/tag/140
+36,분할 정복을 이용한 거듭제곱,Exponentiation By Squaring,ExponentiationBySquaring,https://www.acmicpc.net/problem/tag/39
+37,재귀,Recursion,Recursion,https://www.acmicpc.net/problem/tag/62
+38,매개 변수 탐색,Parametric Search,ParametricSearch,https://www.acmicpc.net/problem/tag/170
+39,에라토스테네스의 체,Sieve Of Eratosthenes,SieveOfEratosthenes,https://www.acmicpc.net/problem/tag/67
+40,확률론,Probability Theory,ProbabilityTheory,https://www.acmicpc.net/problem/tag/177
+41,배낭 문제,Knapsack,Knapsack,https://www.acmicpc.net/problem/tag/148
+42,최소 스패닝 트리,Minimum Spanning Tree,MinimumSpanningTree,https://www.acmicpc.net/problem/tag/49
+43,유클리드 호제법,Euclidean Algorithm,EuclideanAlgorithm,https://www.acmicpc.net/problem/tag/26
+44,값 / 좌표 압축,Value / Coordinate Compression,ValueCoordinateCompression,https://www.acmicpc.net/problem/tag/161
+45,해싱,Hashing,Hashing,https://www.acmicpc.net/problem/tag/8
+46,위상 정렬,Topological Sorting,TopologicalSorting,https://www.acmicpc.net/problem/tag/78
+47,플로이드–와샬,Floyd–warshall,Floyd–warshall,https://www.acmicpc.net/problem/tag/31
+48,슬라이딩 윈도우,Sliding Window,SlidingWindow,https://www.acmicpc.net/problem/tag/68
+49,덱,Deque,Deque,https://www.acmicpc.net/problem/tag/73
+50,가장 긴 증가하는 부분 수열: o(n log n),Longest Increasing Sequence In O(n Log N),LongestIncreasingSequenceInO(nLogN),https://www.acmicpc.net/problem/tag/43
+51,큐,Queue,Queue,https://www.acmicpc.net/problem/tag/72
+52,0-1 너비 우선 탐색,0-1 Bfs,0_1Bfs,https://www.acmicpc.net/problem/tag/176
+53,외판원 순회 문제,Travelling Salesman Problem,TravellingSalesmanProblem,https://www.acmicpc.net/problem/tag/138

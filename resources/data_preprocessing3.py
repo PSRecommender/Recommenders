@@ -30,7 +30,7 @@ def data_preprocessing(
     instance_output_test = dir + 'instance_output_test'
     # instance_output_train = _create_instance(dir, 'train')
     # instance_output_test = _create_instance(dir, 'test')
-    print('create instance done')
+    # print('create instance done')
     _create_item2cate(dir)
     preprocessed_output = _data_processing(instance_output_train)
     # preprocessed_output = dir + 'preprocessed_output'

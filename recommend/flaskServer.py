@@ -7,6 +7,11 @@ import os
 
 app = Flask(__name__)
 
+options = webdriver.ChromeOptions()
+options.add_argument('--headless')
+options.add_argument('--no-sandbox')
+options.add_argument('--disable-dev-shm-usage')
+
 def toJson(dir, dict):
     with open(dir, 'w', encoding='utf-8') as file:
         json.dump(dict, file, ensure_ascii=False, indent='\t')
@@ -15,6 +20,8 @@ def loadJson(dir):
     with open(dir, 'r', encoding='utf-8') as file:
         return json.load(file)
 
+# 사용자가 푼 문제 히스토리 크롤링
+# 이미 크롤링한 사용자일 경우 문제 히스토리가 업데이트 됐을 때만 크롤링
 def getUserData(userId):
     dir = 'D:/AlgorithmProblemRecommender/Recommenders/recommend/data/' + userId
     isMember = False
@@ -28,15 +35,12 @@ def getUserData(userId):
         userDict = loadJson(dir + '/{userId}.json'.format(userId=userId))
         lastSub = userDict[0]['sbNum']
         find = False
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    driver = webdriver.Chrome('D:/AlgorithmProblemRecommender/Recommenders/recommend/chromedriver.exe', options=options)
-    driver.implicitly_wait(1)
+
     url = "https://www.acmicpc.net/status?user_id={userId}&result_id=4".format(userId=userId)
     sbDict = []
     cnt = 1
+    driver = webdriver.Chrome('D:/AlgorithmProblemRecommender/Recommenders/recommend/chromedriver.exe', options=options)
+    driver.implicitly_wait(1)
     driver.get(url)
     while True:
         table = driver.find_element_by_tag_name('tbody')
@@ -70,6 +74,7 @@ def getUserData(userId):
     toJson(dir + '/' + userId + ".json", sbDict)
     driver.quit()
 
+# 사용자가 푼 문제 히스토리 데이터 전처리
 def data_preprocessing(userId):
     # 문제 태그 데이터 가져오기
     dir = 'D:/AlgorithmProblemRecommender/Recommenders/recommend/'
@@ -127,6 +132,7 @@ def data_preprocessing(userId):
         cate = data['category']
         f.write(label + '\t' + userId + '\t' + pId + '\t' + cate + '\t' + now + '\t' + pStr + '\t' + cStr + '\t' + tStr + '\n')
 
+# 추천 결과 가져오기
 def getRecommend(userId):
     dir = 'D:/AlgorithmProblemRecommender/Recommenders/recommend/data/' + userId
     output = pd.read_csv(dir + '/output_sli_rec.txt',sep='\t',header=None,dtype=float,names=['score'])
@@ -135,16 +141,40 @@ def getRecommend(userId):
     df = df.loc[df['score'].sort_values(ascending=False).index]
     df = df.reset_index().drop(['index'], axis=1)
     rec = list(df[df['score']>0.5]['pId'])
-    return rec
+    problems = loadJson('D:/AlgorithmProblemRecommender/Recommenders/recommend/problemData.json')
+    recDict = []
+    for r in rec:
+        for p in problems:
+            if int(r) == p['pId']:
+                recDict.append(p)
+    return recDict
 
-
-@app.route("/", methods=['POST'])
+# 추천
+@app.route("/recommend", methods=['POST'])
 def recommend():
-    userId = request.json['uId']
+    userId = request.json['userId']
     getUserData(userId)
     data_preprocessing(userId)
-    rec = getRecommend(userId)
-    return jsonify(rec)
+    recDict = getRecommend(userId)
+    return jsonify(recDict)
+
+# 사용자 인증
+@app.route("/valid", methods=['GET'])
+def validation():
+    userId = request.args.get('userId')
+    # 백준 사이트에서 사용자 검색해서 나오면 True, 에러 페이지로 가면 False
+    url = "https://www.acmicpc.net/user/{}".format(userId)
+    driver = webdriver.Chrome('D:/AlgorithmProblemRecommender/Recommenders/recommend/chromedriver.exe', options=options)
+    driver.implicitly_wait(1)
+    driver.get(url)
+    check = False
+    try:
+        driver.find_element_by_class_name('error-v1-title')
+    except Exception:
+        check = True
+    driver.quit()
+    return str(check)
+
 
 if __name__ == '__main__':
     app.run()
