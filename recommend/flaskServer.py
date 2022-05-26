@@ -25,6 +25,7 @@ def loadJson(dir):
 def getUserData(userId):
     dir = 'D:/AlgorithmProblemRecommender/Recommenders/recommend/data/' + userId
     isMember = False
+    isUpdate = True
     try:
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -45,12 +46,13 @@ def getUserData(userId):
     while True:
         table = driver.find_element_by_tag_name('tbody')
         tr = table.find_elements_by_tag_name('tr')
-        for i in tr:
-            td = i.find_elements_by_tag_name('td')
+        for i in range(len(tr)):
+            td = tr[i].find_elements_by_tag_name('td')
             sbNum = td[0].text
             if isMember:
                 if sbNum == lastSub: 
                     find = True
+                    if i == 0: isUpdate = False
                     break
             uId = td[1].text
             pId = td[2].text
@@ -69,10 +71,12 @@ def getUserData(userId):
         driver.get(nextPage)
         print(cnt)
         cnt = cnt + 1
-    if isMember:
-        sbDict = sbDict + userDict
-    toJson(dir + '/' + userId + ".json", sbDict)
+    if isUpdate:
+        if isMember:
+            sbDict = sbDict + userDict
+        toJson(dir + '/' + userId + ".json", sbDict)
     driver.quit()
+    return isUpdate
 
 # 사용자가 푼 문제 히스토리 데이터 전처리
 def data_preprocessing(userId):
@@ -133,29 +137,36 @@ def data_preprocessing(userId):
         f.write(label + '\t' + userId + '\t' + pId + '\t' + cate + '\t' + now + '\t' + pStr + '\t' + cStr + '\t' + tStr + '\n')
 
 # 추천 결과 가져오기
-def getRecommend(userId):
+def getRecommend(userId, isUpdate):
     dir = 'D:/AlgorithmProblemRecommender/Recommenders/recommend/data/' + userId
-    output = pd.read_csv(dir + '/output_sli_rec.txt',sep='\t',header=None,dtype=float,names=['score'])
-    test = pd.read_csv(dir + '/test', sep='\t',header=None,dtype=str,names=['label', 'uId', 'pId', 'cate', 'time', 'pHis', 'cHis', 'tHis'])
-    df = pd.concat([output, test], axis=1)
-    df = df.loc[df['score'].sort_values(ascending=False).index]
-    df = df.reset_index().drop(['index'], axis=1)
-    rec = list(df[df['score']>0.5]['pId'])
-    problems = loadJson('D:/AlgorithmProblemRecommender/Recommenders/recommend/problemData.json')
-    recDict = []
-    for r in rec:
-        for p in problems:
-            if int(r) == p['pId']:
-                recDict.append(p)
+    if isUpdate:
+        score = pd.read_csv(dir + '/output_sli_rec.txt',sep='\t',header=None,dtype=float,names=['score'])
+        test = pd.read_csv(dir + '/test', sep='\t',header=None,dtype=str,names=['label', 'uId', 'pId', 'cate', 'time', 'pHis', 'cHis', 'tHis'])
+        df = pd.concat([score, test], axis=1)
+        df = df.loc[df['score'].sort_values(ascending=False).index].head(10)
+        df = df.reset_index().drop(['index'], axis=1)
+        rec = list(df[df['score']>0.5]['pId'])
+        problems = loadJson('D:/AlgorithmProblemRecommender/Recommenders/recommend/problemData.json')
+        recDict = []
+        for r in rec:
+            for p in problems:
+                if int(r) == p['pId']:
+                    recDict.append(p)
+        toJson(dir+"/recommend.json", recDict)
+        print("make recommend")
+    else:
+        recDict = loadJson(dir+"/recommend.json")
+        print("get recommend")
     return recDict
 
 # 추천
 @app.route("/recommend", methods=['POST'])
 def recommend():
     userId = request.json['userId']
-    getUserData(userId)
-    data_preprocessing(userId)
-    recDict = getRecommend(userId)
+    isUpdate = getUserData(userId)
+    if(isUpdate):
+        data_preprocessing(userId)
+    recDict = getRecommend(userId, isUpdate)
     return jsonify(recDict)
 
 # 사용자 인증
@@ -165,7 +176,6 @@ def validation():
     # 백준 사이트에서 사용자 검색해서 나오면 True, 에러 페이지로 가면 False
     url = "https://www.acmicpc.net/user/{}".format(userId)
     driver = webdriver.Chrome('D:/AlgorithmProblemRecommender/Recommenders/recommend/chromedriver.exe', options=options)
-    driver.implicitly_wait(1)
     driver.get(url)
     check = False
     try:
@@ -173,7 +183,7 @@ def validation():
     except Exception:
         check = True
     driver.quit()
-    return str(check)
+    return jsonify({"check":check})
 
 
 if __name__ == '__main__':
