@@ -4,13 +4,12 @@ from datetime import datetime
 import json
 import pandas as pd
 import os
+import requests
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
-options = webdriver.ChromeOptions()
-options.add_argument('--headless')
-options.add_argument('--no-sandbox')
-options.add_argument('--disable-dev-shm-usage')
+headers = {'User-Agent': 'Mozilla/5.0'}
 
 def toJson(dir, dict):
     with open(dir, 'w', encoding='utf-8') as file:
@@ -40,42 +39,42 @@ def getUserData(userId):
     url = "https://www.acmicpc.net/status?user_id={userId}&result_id=4".format(userId=userId)
     sbDict = []
     cnt = 1
-    driver = webdriver.Chrome('D:/AlgorithmProblemRecommender/Recommenders/recommend/chromedriver.exe', options=options)
-    driver.implicitly_wait(1)
-    driver.get(url)
+    response = requests.get(url, headers=headers)
     while True:
-        table = driver.find_element_by_tag_name('tbody')
-        tr = table.find_elements_by_tag_name('tr')
-        for i in range(len(tr)):
-            td = tr[i].find_elements_by_tag_name('td')
-            sbNum = td[0].text
-            if isMember:
-                if sbNum == lastSub: 
-                    find = True
-                    if i == 0: isUpdate = False
-                    break
-            uId = td[1].text
-            pId = td[2].text
-            result = td[3].text
-            memory = td[4].text
-            time = td[5].text
-            lang = td[6].text
-            codeLen = td[7].text
-            sbTime = td[8].find_element_by_tag_name('a').get_attribute('data-timestamp')
-            sbDict.append({'sbNum':sbNum, 'uId':uId, 'pId':pId, 'result':result, 'memory':memory, 'time':time, 'lang':lang, 'codeLen':codeLen, 'sbTime':sbTime})
-        if isMember and find: break
-        try:
-            nextPage = driver.find_element_by_id('next_page').get_attribute('href')
-        except Exception:
-            break
-        driver.get(nextPage)
-        print(cnt)
-        cnt = cnt + 1
+        if response.status_code == 200:
+            html = response.text
+            soup = BeautifulSoup(html, 'html.parser')
+            table = soup.select_one('tbody')
+            tr = table.select('tr')
+            for i in range(len(tr)):
+                td = tr[i].select('td')
+                sbNum = td[0].text
+                if isMember:
+                    if sbNum == lastSub: 
+                        find = True
+                        if i == 0: isUpdate = False
+                        break
+                uId = td[1].text
+                pId = td[2].text
+                result = td[3].text
+                memory = td[4].text
+                time = td[5].text
+                lang = td[6].text
+                codeLen = td[7].text
+                sbTime = td[8].select_one('a')['data-timestamp']
+                sbDict.append({'sbNum':sbNum, 'uId':uId, 'pId':pId, 'result':result, 'memory':memory, 'time':time, 'lang':lang, 'codeLen':codeLen, 'sbTime':sbTime})
+            if isMember and find: break
+            try:
+                nextPage = 'https://www.acmicpc.net' + soup.select_one('#next_page')['href']
+            except Exception:
+                break
+            response = requests.get(nextPage, headers=headers)
+            print(cnt)
+            cnt = cnt + 1
     if isUpdate:
         if isMember:
             sbDict = sbDict + userDict
         toJson(dir + '/' + userId + ".json", sbDict)
-    driver.quit()
     return isUpdate
 
 # 사용자가 푼 문제 히스토리 데이터 전처리
@@ -175,14 +174,12 @@ def validation():
     userId = request.args.get('userId')
     # 백준 사이트에서 사용자 검색해서 나오면 True, 에러 페이지로 가면 False
     url = "https://www.acmicpc.net/user/{}".format(userId)
-    driver = webdriver.Chrome('D:/AlgorithmProblemRecommender/Recommenders/recommend/chromedriver.exe', options=options)
-    driver.get(url)
-    check = False
-    try:
-        driver.find_element_by_class_name('error-v1-title')
-    except Exception:
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
         check = True
-    driver.quit()
+    elif response.status_code == 404:
+        check = False
+    print(response.status_code)
     return jsonify({"check":check})
 
 
