@@ -12,3 +12,4 @@ valid_data
 test_data*
 *.pkl
 *output*
+path.py

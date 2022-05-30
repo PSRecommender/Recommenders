@@ -18,16 +18,18 @@ from recommenders.models.deeprec.deeprec_utils import (
 from recommenders.models.deeprec.models.sequential.sli_rec import SLI_RECModel as SeqModel
 from recommenders.models.deeprec.io.sequential_iterator import SequentialIterator
 
+from path import sli_path, resource_path, path
+
 def set_model():
     ##  ATTENTION: change to the corresponding config file, e.g., caser.yaml for CaserModel, sum.yaml for SUMModel
     # yaml_file = '../../recommenders/models/deeprec/config/sli_rec.yaml'  
-    yaml_file = '/tf/Recommenders/sli_rec.yaml'  
+    yaml_file = sli_path  
 
     EPOCHS = 10
     BATCH_SIZE = 400
     RANDOM_SEED = SEED  # Set None for non-deterministic result
 
-    data_path = os.path.join("/tf/Recommenders/resources/20220520")
+    data_path = os.path.join(resource_path)
     # for test
     user_vocab = os.path.join(data_path, r'user_vocab.pkl')
     item_vocab = os.path.join(data_path, r'item_vocab.pkl')
@@ -63,7 +65,8 @@ def set_model():
 
 
 def predict(model, userId):
-    user_path = os.path.join("/tf/Recommenders/recommend/data/{}".format(userId))
+    tpath = path + r'data'
+    user_path = os.path.join("{}/{}".format(tpath, userId))
 
     predict_file = os.path.join(user_path, r'test_{}'.format(userId))
     output_file = os.path.join(user_path, r'output_{}.txt'.format(userId))
