@@ -6,6 +6,7 @@ import pandas as pd
 import os
 import requests
 from bs4 import BeautifulSoup
+from path import path
 
 app = Flask(__name__)
 
@@ -22,7 +23,7 @@ def loadJson(dir):
 # 사용자가 푼 문제 히스토리 크롤링
 # 이미 크롤링한 사용자일 경우 문제 히스토리가 업데이트 됐을 때만 크롤링
 def getUserData(userId):
-    dir = 'D:/AlgorithmProblemRecommender/Recommenders/recommend/data/' + userId
+    dir = path + 'data/' + userId
     isMember = False
     isUpdate = True
     try:
@@ -80,7 +81,7 @@ def getUserData(userId):
 # 사용자가 푼 문제 히스토리 데이터 전처리
 def data_preprocessing(userId):
     # 문제 태그 데이터 가져오기
-    dir = 'D:/AlgorithmProblemRecommender/Recommenders/recommend/'
+    dir = path
     categoryDF = pd.read_csv(dir + 'category.csv', index_col=0, dtype=str, encoding='utf-8')
 
     file = dir + 'data/{userId}/{userId}.json'.format(userId=userId)
@@ -137,15 +138,15 @@ def data_preprocessing(userId):
 
 # 추천 결과 가져오기
 def getRecommend(userId, isUpdate):
-    dir = 'D:/AlgorithmProblemRecommender/Recommenders/recommend/data/' + userId
+    dir = path + 'data/' + userId
     if isUpdate:
         score = pd.read_csv(dir + '/output_sli_rec.txt',sep='\t',header=None,dtype=float,names=['score'])
         test = pd.read_csv(dir + '/test', sep='\t',header=None,dtype=str,names=['label', 'uId', 'pId', 'cate', 'time', 'pHis', 'cHis', 'tHis'])
         df = pd.concat([score, test], axis=1)
-        df = df.loc[df['score'].sort_values(ascending=False).index].head(10)
+        df = df.loc[df['score'].sort_values(ascending=False).index].head(20)
         df = df.reset_index().drop(['index'], axis=1)
         rec = list(df[df['score']>0.5]['pId'])
-        problems = loadJson('D:/AlgorithmProblemRecommender/Recommenders/recommend/problemData.json')
+        problems = loadJson(path + 'problemData.json')
         recDict = []
         for r in rec:
             for p in problems:
