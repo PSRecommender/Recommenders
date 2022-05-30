@@ -208,28 +208,33 @@ def getRecommend(userId, isUpdate):
     return recDict
 
 def valid_check(userId):
-    check = False
     url = "https://www.acmicpc.net/user/{}".format(userId)
     response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        check = True
-    elif response.status_code == 404:
-        check = False
+    if response.status_code != 200:
+        return response.status_code
+    
+    html = response.text
+    soup = BeautifulSoup(html, 'html.parser')
+    snum = soup.select_one('#u-result-4')
+    if snum is None:
+        return -1
     return response.status_code
-
+    
 # 추천
 @app.route("/recommend", methods=['POST'])
 def recommend():
     userId = request.json['userId']
-    if(valid_check(userId) == 404):
-        return jsonify({"check":False})
+    stateCode = valid_check(userId)
+    if(stateCode != 200):
+        return jsonify({'result':stateCode})
     
     isUpdate = getUserData(userId)
     if(isUpdate):
         data_preprocessing(userId)
         predict(model, userId)
     recDict = getRecommend(userId, isUpdate)
-    return jsonify(recDict)
+    result = {'result':recDict}
+    return jsonify(result)
 
 # 사용자 인증
 @app.route("/valid", methods=['GET'])
@@ -238,12 +243,8 @@ def validation():
     # 백준 사이트에서 사용자 검색해서 나오면 True, 에러 페이지로 가면 False
     response_code = valid_check(userId)
     
-    if response_code == 200:
-        check = True
-    elif response_code == 404:
-        check = False
     print(response_code)
-    return jsonify({"check":check})
+    return jsonify({"response_code":response_code})
 
 
 if __name__ == '__main__':
