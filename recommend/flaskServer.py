@@ -6,7 +6,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 import sys
-
+import random
 from model import set_model, predict
 
 from path import path
@@ -34,8 +34,9 @@ def getUserData(userId):
     isUpdate = True
     try:
         if not os.path.exists(dir):
-            os.makedirs(dir)
+            os.mkdir(dir)
         else: isMember = True
+        print(isMember)
     except OSError:
         print('Error : mkdir')
     if isMember:
@@ -171,10 +172,23 @@ def getRecommend(userId, isUpdate):
         print("get recommend")
     return recDict
 
+def valid_check(userId):
+    check = False
+    url = "https://www.acmicpc.net/user/{}".format(userId)
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        check = True
+    elif response.status_code == 404:
+        check = False
+    return response.status_code
+
 # 추천
 @app.route("/recommend", methods=['POST'])
 def recommend():
     userId = request.json['userId']
+    if(valid_check(userId) == 404):
+        return jsonify({"check":False})
+    
     isUpdate = getUserData(userId)
     if(isUpdate):
         data_preprocessing(userId)
@@ -187,13 +201,13 @@ def recommend():
 def validation():
     userId = request.args.get('userId')
     # 백준 사이트에서 사용자 검색해서 나오면 True, 에러 페이지로 가면 False
-    url = "https://www.acmicpc.net/user/{}".format(userId)
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
+    response_code = valid_check(userId)
+    
+    if response_code == 200:
         check = True
-    elif response.status_code == 404:
+    elif response_code == 404:
         check = False
-    print(response.status_code)
+    print(response_code)
     return jsonify({"check":check})
 
 
