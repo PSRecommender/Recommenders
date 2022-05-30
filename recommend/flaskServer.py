@@ -1,16 +1,21 @@
 from flask import Flask, request, jsonify
-from selenium import webdriver
 from datetime import datetime
 import json
 import pandas as pd
 import os
 import requests
 from bs4 import BeautifulSoup
+import sys
+import random
+from model import set_model, predict
+
 from path import path
 
 app = Flask(__name__)
 
 headers = {'User-Agent': 'Mozilla/5.0'}
+
+model = set_model()
 
 def toJson(dir, dict):
     with open(dir, 'w', encoding='utf-8') as file:
@@ -23,13 +28,15 @@ def loadJson(dir):
 # 사용자가 푼 문제 히스토리 크롤링
 # 이미 크롤링한 사용자일 경우 문제 히스토리가 업데이트 됐을 때만 크롤링
 def getUserData(userId):
+
     dir = path + 'data/' + userId
     isMember = False
     isUpdate = True
     try:
         if not os.path.exists(dir):
-            os.makedirs(dir)
+            os.mkdir(dir)
         else: isMember = True
+        print(isMember)
     except OSError:
         print('Error : mkdir')
     if isMember:
@@ -90,6 +97,10 @@ def data_preprocessing(userId):
     userDF = userDF[userDF['result']=='맞았습니다!!']
     # 문제셋에 해당하는 문제만 추출
     userDF = userDF[userDF['pId'].isin(categoryDF['pId'])]
+    
+    # erase duplications
+    userDF.drop_duplicates(subset=['pId'], keep='last', inplace=True, ignore_index=True)
+    
     # 문제 제출 번호에 따라 오름차순으로 정렬
     userDF = userDF.sort_values(by='sbNum')
     if len(userDF) == 0: return
@@ -135,13 +146,15 @@ def data_preprocessing(userId):
         pId = data['pId']
         cate = data['category']
         f.write(label + '\t' + userId + '\t' + pId + '\t' + cate + '\t' + now + '\t' + pStr + '\t' + cStr + '\t' + tStr + '\n')
+    f.close()
+    
 
 # 추천 결과 가져오기
 def getRecommend(userId, isUpdate):
     dir = path + 'data/' + userId
     if isUpdate:
-        score = pd.read_csv(dir + '/output_sli_rec.txt',sep='\t',header=None,dtype=float,names=['score'])
-        test = pd.read_csv(dir + '/test', sep='\t',header=None,dtype=str,names=['label', 'uId', 'pId', 'cate', 'time', 'pHis', 'cHis', 'tHis'])
+        score = pd.read_csv(dir + '/output_{}.txt'.format(userId),sep='\t',header=None,dtype=float,names=['score'])
+        test = pd.read_csv(dir + '/test_{}'.format(userId), sep='\t',header=None,dtype=str,names=['label', 'uId', 'pId', 'cate', 'time', 'pHis', 'cHis', 'tHis'])
         df = pd.concat([score, test], axis=1)
         df = df.loc[df['score'].sort_values(ascending=False).index].head(20)
         df = df.reset_index().drop(['index'], axis=1)
@@ -159,13 +172,27 @@ def getRecommend(userId, isUpdate):
         print("get recommend")
     return recDict
 
+def valid_check(userId):
+    check = False
+    url = "https://www.acmicpc.net/user/{}".format(userId)
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        check = True
+    elif response.status_code == 404:
+        check = False
+    return response.status_code
+
 # 추천
 @app.route("/recommend", methods=['POST'])
 def recommend():
     userId = request.json['userId']
+    if(valid_check(userId) == 404):
+        return jsonify({"check":False})
+    
     isUpdate = getUserData(userId)
     if(isUpdate):
         data_preprocessing(userId)
+        predict(model, userId)
     recDict = getRecommend(userId, isUpdate)
     return jsonify(recDict)
 
@@ -174,13 +201,13 @@ def recommend():
 def validation():
     userId = request.args.get('userId')
     # 백준 사이트에서 사용자 검색해서 나오면 True, 에러 페이지로 가면 False
-    url = "https://www.acmicpc.net/user/{}".format(userId)
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
+    response_code = valid_check(userId)
+    
+    if response_code == 200:
         check = True
-    elif response.status_code == 404:
+    elif response_code == 404:
         check = False
-    print(response.status_code)
+    print(response_code)
     return jsonify({"check":check})
 
 
