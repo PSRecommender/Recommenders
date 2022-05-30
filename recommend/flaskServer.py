@@ -10,6 +10,7 @@ import random
 from model import set_model, predict
 
 from path import path
+from btype import recommendForB
 
 app = Flask(__name__)
 
@@ -35,6 +36,9 @@ def getUserData(userId):
     try:
         if not os.path.exists(dir):
             os.mkdir(dir)
+            token_file = open(dir+'/{}_token.txt'.format(userId), 'w', encoding='utf-8')
+            token_file.write(str(random.randrange(0, 2)))
+            token_file.close()
         else: isMember = True
         print(isMember)
     except OSError:
@@ -152,19 +156,48 @@ def data_preprocessing(userId):
 # 추천 결과 가져오기
 def getRecommend(userId, isUpdate):
     dir = path + 'data/' + userId
+    token_file = open(dir+'/{}_token.txt'.format(userId), 'r', encoding='utf-8')
+    token = token_file.readline()
+    token_file.close()
     if isUpdate:
-        score = pd.read_csv(dir + '/output_{}.txt'.format(userId),sep='\t',header=None,dtype=float,names=['score'])
-        test = pd.read_csv(dir + '/test_{}'.format(userId), sep='\t',header=None,dtype=str,names=['label', 'uId', 'pId', 'cate', 'time', 'pHis', 'cHis', 'tHis'])
-        df = pd.concat([score, test], axis=1)
-        df = df.loc[df['score'].sort_values(ascending=False).index].head(20)
-        df = df.reset_index().drop(['index'], axis=1)
-        rec = list(df[df['score']>0.5]['pId'])
-        problems = loadJson(path + 'problemData.json')
-        recDict = []
-        for r in rec:
-            for p in problems:
-                if int(r) == p['pId']:
-                    recDict.append(p)
+        if token == '1':
+            recDict = recommendForB(userId)
+        else:
+            score = pd.read_csv(dir + '/output_{}.txt'.format(userId),sep='\t',header=None,dtype=float,names=['score'])
+            test = pd.read_csv(dir + '/test_{}'.format(userId), sep='\t',header=None,dtype=str,names=['label', 'uId', 'pId', 'cate', 'time', 'pHis', 'cHis', 'tHis'])
+            df = pd.concat([score, test], axis=1)
+            df = df.loc[df['score'].sort_values(ascending=False).index]
+            df = df.reset_index().drop(['index'], axis=1)
+            df = df[df['score']>0.5]
+            df = df[['score','pId','cate']]
+            problemDF = pd.read_csv('problemInfo.csv', index_col=0, dtype=str)
+            problemDF = problemDF[['pId','successCnt']]
+            df = pd.merge(df, problemDF, how='left', on='pId')
+            scoreList = list(df['score'])
+            newScoreList = []
+            for s in scoreList:
+                newScoreList.append(float("{:.1f}".format(s)))
+            df['score'] = newScoreList
+            df = df.astype({'successCnt':'int'})
+            df = df.sort_values(['score','successCnt'], ascending=[False,False], ignore_index=True)
+            tagCnt = {}
+            problems = loadJson(path + 'problemData.json')
+            recDict = []
+            for i in range(len(df)):
+                data = df.loc[i]
+                id = data['pId']
+                tag = data['cate']
+                keys = tagCnt.keys()
+                if tag in keys:
+                    tagCnt[tag] += 1
+                else:
+                    tagCnt[tag] = 1
+                if tagCnt[tag]<4:
+                    for p in problems:
+                        if int(id) == p['pId']:
+                            recDict.append(p)
+                if len(recDict) == 26:
+                    break
         toJson(dir+"/recommend.json", recDict)
         print("make recommend")
     else:
