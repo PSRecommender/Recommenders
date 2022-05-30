@@ -401,7 +401,7 @@ def _negative_sampling_offline(
             words[3] = item2cate[neg_item]
             write_test.write("\t".join(words) + "\n")
 
-dir = "D:/AlgorithmProblemRecommender/Recommenders/resources/"
+dir = "./resources/"
 data_preprocessing(dir, dir + "train_data", dir + "valid_data", dir + "test_data", dir + "user_vocab.pkl" , dir + "item_vocab.pkl", dir + "cate_vocab.pkl")
 
 
