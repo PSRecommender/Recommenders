@@ -1,6 +1,8 @@
 import pandas as pd
 import json
+import random
 from path import path
+
 
 def toJson(dir, dict):
     with open(dir, 'w', encoding='utf-8') as file:
@@ -134,6 +136,7 @@ def recommendForB(userId):
         for p in problems:
             if int(r) == p['pId']:
                 recDict.append(p)
+    random.shuffle(recDict)
     return recDict
     
 

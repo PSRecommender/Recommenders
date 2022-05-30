@@ -37,8 +37,10 @@ def getUserData(userId):
         if not os.path.exists(dir):
             os.mkdir(dir)
             token_file = open(dir+'/{}_token.txt'.format(userId), 'w', encoding='utf-8')
-            token_file.write(str(random.randrange(0, 2)))
+            token = str(random.randrange(0, 2))
+            token_file.write(token)
             token_file.close()
+            print(token)
         else: isMember = True
         print(isMember)
     except OSError:
