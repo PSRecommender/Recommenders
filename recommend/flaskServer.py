@@ -100,7 +100,9 @@ def data_preprocessing(userId):
     file = dir + 'data/{userId}/{userId}.json'.format(userId=userId)
     userDF = pd.read_json(file, dtype = str, encoding='utf-8')
     # 맞은 문제만 추출
-    userDF = userDF[userDF['result']=='맞았습니다!!']
+    userIndex = list(userDF[userDF['result']=='맞았습니다!!'].index)
+    userIndex = userIndex + list(userDF[userDF['result']=='100점'].index)
+    userDF = userDF.loc[userIndex]
     # 문제셋에 해당하는 문제만 추출
     userDF = userDF[userDF['pId'].isin(categoryDF['pId'])]
     
@@ -174,13 +176,15 @@ def getRecommend(userId, isUpdate):
             df = df[['score','pId','cate']]
             problemDF = pd.read_csv('problemInfo.csv', index_col=0, dtype=str)
             problemDF = problemDF[['pId','successCnt']]
+            problemDF = problemDF.astype({'successCnt':'int'})
             df = pd.merge(df, problemDF, how='left', on='pId')
             scoreList = list(df['score'])
             newScoreList = []
             for s in scoreList:
                 newScoreList.append(float("{:.1f}".format(s)))
             df['score'] = newScoreList
-            df = df.astype({'successCnt':'int'})
+            #print(df[df['successCnt'].isnull()])
+            #df = df.astype({'successCnt':'int'})
             df = df.sort_values(['score','successCnt'], ascending=[False,False], ignore_index=True)
             tagCnt = {}
             problems = loadJson(path + 'problemData.json')
