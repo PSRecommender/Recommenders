@@ -7,7 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 import sys
 import random
-from model import set_model, predict
+# from model import set_model, predict
 
 from path import path
 from btype import recommendForB
@@ -16,7 +16,7 @@ app = Flask(__name__)
 
 headers = {'User-Agent': 'Mozilla/5.0'}
 
-model = set_model()
+# model = set_model()
 
 def toJson(dir, dict):
     with open(dir, 'w', encoding='utf-8') as file:
@@ -165,7 +165,7 @@ def getRecommend(userId, isUpdate):
     token_file.close()
     if isUpdate:
         if token == '1':
-            recDict = recommendForB(userId)
+            recommendProblems = recommendForB(userId)
         else:
             score = pd.read_csv(dir + '/output_{}.txt'.format(userId),sep='\t',header=None,dtype=float,names=['score'])
             test = pd.read_csv(dir + '/test_{}'.format(userId), sep='\t',header=None,dtype=str,names=['label', 'uId', 'pId', 'cate', 'time', 'pHis', 'cHis', 'tHis'])
@@ -174,7 +174,7 @@ def getRecommend(userId, isUpdate):
             df = df.reset_index().drop(['index'], axis=1)
             df = df[df['score']>0.5]
             df = df[['score','pId','cate']]
-            problemDF = pd.read_csv('problemInfo.csv', index_col=0, dtype=str)
+            problemDF = pd.read_csv(path + 'problemInfo.csv', index_col=0, dtype=str)
             problemDF = problemDF[['pId','successCnt']]
             problemDF = problemDF.astype({'successCnt':'int'})
             df = pd.merge(df, problemDF, how='left', on='pId')
@@ -188,6 +188,7 @@ def getRecommend(userId, isUpdate):
             df = df.sort_values(['score','successCnt'], ascending=[False,False], ignore_index=True)
             tagCnt = {}
             problems = loadJson(path + 'problemData.json')
+            recommendProblems = []
             recDict = []
             for i in range(len(df)):
                 data = df.loc[i]
@@ -199,16 +200,24 @@ def getRecommend(userId, isUpdate):
                 else:
                     tagCnt[tag] = 1
                 if tagCnt[tag]<4:
-                    for p in problems:
-                        if int(id) == p['pId']:
-                            recDict.append(p)
-                if len(recDict) == 26:
+                    # for p in problems:
+                    #     if int(id) == p['pId']:
+                    #         recDict.append(p)
+                    recommendProblems.append(id)
+                if len(recommendProblems) == 10:
                     break
-        toJson(dir+"/recommend.json", recDict)
+        toJson(dir+"/recommend.json", recommendProblems)
         print("make recommend")
     else:
-        recDict = loadJson(dir+"/recommend.json")
+        recommendProblems = loadJson(dir+"/recommend.json")
         print("get recommend")
+    
+    problemStr = ""
+    for p in recommendProblems:
+        problemStr += p + ","
+    problemStr = problemStr[:-1]
+    apiUrl = 'https://solved.ac/api/v3/problem/lookup?problemIds='
+    recDict = requests.get(apiUrl+problemStr).json()
     return recDict
 
 def valid_check(userId):
@@ -233,9 +242,9 @@ def recommend():
         return jsonify({'result':stateCode})
     
     isUpdate = getUserData(userId)
-    if(isUpdate):
-        data_preprocessing(userId)
-        predict(model, userId)
+    # if(isUpdate):
+    #     data_preprocessing(userId)
+    #     predict(model, userId)
     recDict = getRecommend(userId, isUpdate)
     result = {'result':recDict}
     return jsonify(result)

@@ -130,13 +130,13 @@ def recommendForB(userId):
             cnt+=1
             rec = df.loc[cnt]['pId']
         if rec not in recommendProblems: recommendProblems.append(rec)
-    problems = loadJson(path+'problemData.json')
-    recDict = []
-    for r in recommendProblems:
-        for p in problems:
-            if int(r) == p['pId']:
-                recDict.append(p)
-    random.shuffle(recDict)
-    return recDict
+    # problems = loadJson(path+'problemData.json')
+    # recDict = []
+    # for r in recommendProblems:
+    #     for p in problems:
+    #         if int(r) == p['pId']:
+    #             recDict.append(p)
+    random.shuffle(recommendProblems)
+    return recommendProblems
     
 
