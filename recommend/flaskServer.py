@@ -5,9 +5,8 @@ import pandas as pd
 import os
 import requests
 from bs4 import BeautifulSoup
-import sys
 import random
-# from model import set_model, predict
+from model import set_model, predict
 
 from path import path
 from btype import recommendForB
@@ -16,7 +15,7 @@ app = Flask(__name__)
 
 headers = {'User-Agent': 'Mozilla/5.0'}
 
-# model = set_model()
+model = set_model()
 
 def toJson(dir, dict):
     with open(dir, 'w', encoding='utf-8') as file:
@@ -36,11 +35,6 @@ def getUserData(userId):
     try:
         if not os.path.exists(dir):
             os.mkdir(dir)
-            token_file = open(dir+'/{}_token.txt'.format(userId), 'w', encoding='utf-8')
-            token = str(random.randrange(0, 2))
-            token_file.write(token)
-            token_file.close()
-            print(token)
         else: isMember = True
         print(isMember)
     except OSError:
@@ -160,9 +154,6 @@ def data_preprocessing(userId):
 # 추천 결과 가져오기
 def getRecommend(userId, isUpdate, type):
     dir = path + 'data/' + userId
-    # token_file = open(dir+'/{}_token.txt'.format(userId), 'r', encoding='utf-8')
-    # token = token_file.readline()
-    # token_file.close()
     if isUpdate:
         if type == 'B':
             recommendProblems = recommendForB(userId)
@@ -183,8 +174,6 @@ def getRecommend(userId, isUpdate, type):
             for s in scoreList:
                 newScoreList.append(float("{:.1f}".format(s)))
             df['score'] = newScoreList
-            #print(df[df['successCnt'].isnull()])
-            #df = df.astype({'successCnt':'int'})
             df = df.sort_values(['score','successCnt'], ascending=[False,False], ignore_index=True)
             tagCnt = {}
             recommendProblems = []
@@ -232,7 +221,7 @@ def getReport(userId):
     userDF = userDF.loc[userIndex]
     # 문제셋에 해당하는 문제만 추출
     userDF = userDF[userDF['pId'].isin(categoryDF['pId'])]
-    # erase duplications
+    # 중복 제거
     userDF.drop_duplicates(subset=['pId'], keep='last', inplace=True, ignore_index=True)
     recentSlovedProblems = list(userDF.head(100)['pId'])
     problemStr = ""
@@ -291,9 +280,9 @@ def recommend():
         return jsonify({'status':statusCode})
     
     isUpdate = getUserData(userId)
-    # if(isUpdate):
-    #     data_preprocessing(userId)
-    #     predict(model, userId)
+    if(isUpdate):
+        data_preprocessing(userId)
+        predict(model, userId)
     recDataA = getRecommend(userId, isUpdate, 'A')
     recDataB = getRecommend(userId, isUpdate, 'B')
     reportData = getReport(userId)
