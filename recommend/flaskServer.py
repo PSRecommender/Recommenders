@@ -158,13 +158,13 @@ def data_preprocessing(userId):
     
 
 # 추천 결과 가져오기
-def getRecommend(userId, isUpdate):
+def getRecommend(userId, isUpdate, type):
     dir = path + 'data/' + userId
-    token_file = open(dir+'/{}_token.txt'.format(userId), 'r', encoding='utf-8')
-    token = token_file.readline()
-    token_file.close()
+    # token_file = open(dir+'/{}_token.txt'.format(userId), 'r', encoding='utf-8')
+    # token = token_file.readline()
+    # token_file.close()
     if isUpdate:
-        if token == '1':
+        if type == 'B':
             recommendProblems = recommendForB(userId)
         else:
             score = pd.read_csv(dir + '/output_{}.txt'.format(userId),sep='\t',header=None,dtype=float,names=['score'])
@@ -187,9 +187,7 @@ def getRecommend(userId, isUpdate):
             #df = df.astype({'successCnt':'int'})
             df = df.sort_values(['score','successCnt'], ascending=[False,False], ignore_index=True)
             tagCnt = {}
-            problems = loadJson(path + 'problemData.json')
             recommendProblems = []
-            recDict = []
             for i in range(len(df)):
                 data = df.loc[i]
                 id = data['pId']
@@ -200,25 +198,76 @@ def getRecommend(userId, isUpdate):
                 else:
                     tagCnt[tag] = 1
                 if tagCnt[tag]<4:
-                    # for p in problems:
-                    #     if int(id) == p['pId']:
-                    #         recDict.append(p)
                     recommendProblems.append(id)
                 if len(recommendProblems) == 10:
                     break
-        toJson(dir+"/recommend.json", recommendProblems)
-        print("make recommend")
+        toJson(dir+"/recommend{}.json".format(type), recommendProblems)
+        print("make recommend{}".format(type))
     else:
-        recommendProblems = loadJson(dir+"/recommend.json")
-        print("get recommend")
-    
+        recommendProblems = loadJson(dir+"/recommend{}.json".format(type))
+        print("get recommend{}".format(type))
+    recDict = []
+    apiUrl = 'https://solved.ac/api/v3/problem/lookup?problemIds='
     problemStr = ""
     for p in recommendProblems:
         problemStr += p + ","
     problemStr = problemStr[:-1]
-    apiUrl = 'https://solved.ac/api/v3/problem/lookup?problemIds='
-    recDict = requests.get(apiUrl+problemStr).json()
+    apiResponse = requests.get(apiUrl+problemStr).json()
+    for p in recommendProblems:
+        for pb in apiResponse:
+            pId = pb['problemId']
+            if int(p) == pId:
+                recDict.append(pb)
     return recDict
+
+def getReport(userId):
+    dir = path
+    categoryDF = pd.read_csv(dir + 'category.csv', index_col=0, dtype=str, encoding='utf-8')
+
+    file = dir + 'data/{userId}/{userId}.json'.format(userId=userId)
+    userDF = pd.read_json(file, dtype = str, encoding='utf-8')
+    # 맞은 문제만 추출
+    userIndex = list(userDF[userDF['result']=='맞았습니다!!'].index)
+    userIndex = userIndex + list(userDF[userDF['result']=='100점'].index)
+    userDF = userDF.loc[userIndex]
+    # 문제셋에 해당하는 문제만 추출
+    userDF = userDF[userDF['pId'].isin(categoryDF['pId'])]
+    # erase duplications
+    userDF.drop_duplicates(subset=['pId'], keep='last', inplace=True, ignore_index=True)
+    recentSlovedProblems = list(userDF.head(100)['pId'])
+    problemStr = ""
+    for p in recentSlovedProblems:
+        problemStr += p + ","
+    problemStr = problemStr[:-1]
+    apiUrl = 'https://solved.ac/api/v3/problem/lookup?problemIds='
+    response = requests.get(apiUrl+problemStr).json()
+    tagCnt = {}
+    for p in response:
+        tags = p['tags']
+        for t in tags:
+            tagName = t['displayNames'][0]['name']
+            keys = tagCnt.keys()
+            if tagName not in keys:
+                tagCnt[tagName] = 1
+            else:
+                tagCnt[tagName] += 1
+    tagCnt = dict(sorted(tagCnt.items(), key=lambda x: x[1], reverse=True))
+    topTags = list(tagCnt.keys())[:10]
+    reportData = []
+    for t in topTags:
+        dic = {'tag':t, 'Bronze':0, 'Silver':0, "Gold":0, 'Platinum':0}
+        for p in response:
+            level = p['level']
+            tags = p['tags']
+            for tag in tags:
+                tagName = tag['displayNames'][0]['name']
+                if tagName == t:
+                    if level<6: dic['Bronze']+=1
+                    elif level<11: dic['Silver']+=1
+                    elif level<16: dic['Gold']+=1
+                    elif level<21: dic['Platinum']+=1
+        reportData.append(dic)
+    return reportData
 
 def valid_check(userId):
     url = "https://www.acmicpc.net/user/{}".format(userId)
@@ -237,16 +286,18 @@ def valid_check(userId):
 @app.route("/recommend", methods=['POST'])
 def recommend():
     userId = request.json['userId']
-    stateCode = valid_check(userId)
-    if(stateCode != 200):
-        return jsonify({'result':stateCode})
+    statusCode = valid_check(userId)
+    if(statusCode != 200):
+        return jsonify({'status':statusCode})
     
     isUpdate = getUserData(userId)
     # if(isUpdate):
     #     data_preprocessing(userId)
     #     predict(model, userId)
-    recDict = getRecommend(userId, isUpdate)
-    result = {'result':recDict}
+    recDataA = getRecommend(userId, isUpdate, 'A')
+    recDataB = getRecommend(userId, isUpdate, 'B')
+    reportData = getReport(userId)
+    result = {'status':statusCode, 'report':reportData, 'recommendA':recDataA, 'recommendB':recDataB}
     return jsonify(result)
 
 # 사용자 인증

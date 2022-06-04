@@ -111,7 +111,7 @@ def recommendForB(userId):
         recommendByTag[t] = pIds
 
     # 문제 정보
-    problems = pd.read_json('problemData.json')
+    problems = pd.read_json(dir + 'problemData.json')
     problems = problems[['pId', 'title', 'successCnt']]
 
     # 추천 문제 뽑기(태그 별 맞은 사람 많은 순으로)
@@ -120,23 +120,12 @@ def recommendForB(userId):
         problemList = recommendByTag[t]
         df = problems[problems['pId'].isin(problemList)].sort_values('successCnt', ascending=False, ignore_index=True)
         cnt = 0
-        rec = df.loc[cnt]['pId']
+        rec = str(df.loc[cnt]['pId'])
         dfLen = len(df)
         while rec in recommendProblems and cnt < dfLen:
             cnt+=1
-            rec = df.loc[cnt]['pId']
+            rec = str(df.loc[cnt]['pId'])
         if rec not in recommendProblems: recommendProblems.append(rec)
-        while rec in recommendProblems and cnt < dfLen:
-            cnt+=1
-            rec = df.loc[cnt]['pId']
-        if rec not in recommendProblems: recommendProblems.append(rec)
-    # problems = loadJson(path+'problemData.json')
-    # recDict = []
-    # for r in recommendProblems:
-    #     for p in problems:
-    #         if int(r) == p['pId']:
-    #             recDict.append(p)
-    random.shuffle(recommendProblems)
     return recommendProblems
     
 
