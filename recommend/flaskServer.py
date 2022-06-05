@@ -212,6 +212,10 @@ def getRecommend(userId, isUpdate):
     return recDict
 
 def valid_check(userId):
+    valid_s = "1234567890_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    for c in userId:
+        if c not in valid_s:
+            return 404
     url = "https://www.acmicpc.net/user/{}".format(userId)
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
